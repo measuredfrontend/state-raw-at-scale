@@ -1,0 +1,172 @@
+{
+  "env": {
+    "date": "2026-09-29T05:24:25.417Z",
+    "node": "v26.3.0",
+    "os": "Windows_NT 10.0.26200",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900KF",
+    "cores": 32,
+    "ramGb": 64,
+    "svelte": "5.57.1",
+    "kit": "2.70.3",
+    "adapterNode": "5.5.7",
+    "vite": "8.3.1",
+    "playwright": "1.63.0",
+    "chromium": "153.0.8010.12",
+    "server": "node build (adapter-node), production build, http://127.0.0.1:4304"
+  },
+  "otherLoad": {
+    "pythonProcesses": 0,
+    "python": [],
+    "cpuBusyPercentBefore": 4.29,
+    "gpu": "7 %, 3440 MiB"
+  },
+  "results": [
+    {
+      "id": "T1",
+      "rule": "rule 1",
+      "title": "at 1,000 rows every operation, every variant, finishes within one frame (16.7 ms) unthrottled, list rendered",
+      "pass": true,
+      "detail": {
+        "deep": "assign 13.7 ms",
+        "raw": "assign 5.9 ms",
+        "hybrid": "assign 6.4 ms",
+        "class": "assign 7.3 ms"
+      }
+    },
+    {
+      "id": "T2",
+      "rule": "rule 2",
+      "title": "at 100,000 rows with a $derived total, $state costs at least 10x $state.raw to assign and uses 50+ MB more heap",
+      "pass": true,
+      "detail": {
+        "assignMs": {
+          "deep": 152,
+          "raw": 0.4
+        },
+        "heapMb": {
+          "deep": 148.2,
+          "raw": 0
+        }
+      }
+    },
+    {
+      "id": "T3",
+      "rule": "rule 3",
+      "title": "$state.raw mutated in place: the screen does not change; a new array shows the pushed row but NOT the edited field; only a new object for that row shows it",
+      "pass": true,
+      "detail": {
+        "before": "976.91,466.23,257.82",
+        "afterMutation": "976.91,466.23,257.82",
+        "afterNewArray": "976.91,466.23,257.82,500",
+        "afterNewRowObject": "999,466.23,257.82,500"
+      }
+    },
+    {
+      "id": "T4",
+      "rule": "rule 4",
+      "title": "$state creates proxies lazily: assigning 100,000 unread rows is under 5 ms and adds under 1 MB; the first full read adds 50+ MB and is slower than the second",
+      "pass": true,
+      "detail": {
+        "assignMs": 0.1,
+        "heapAfterAssignMb": 0,
+        "read1Ms": 119.5,
+        "heapAfterReadMb": 111.57,
+        "read2Ms": 47.2
+      }
+    },
+    {
+      "id": "T5",
+      "rule": "rule 5",
+      "title": "hybrid: the first edit of a row swaps in a $state proxy (new array); later edits change only that row (same array) and update the screen",
+      "pass": true,
+      "detail": {
+        "hybrid": "219.76,22,779.86",
+        "hybridArrayReplacedOnFirstEdit": true,
+        "hybridArrayKeptOnSecondEdit": true,
+        "klass": "219.76,33,779.86",
+        "classArrayKept": true,
+        "deep": "219.76,44,779.86"
+      }
+    },
+    {
+      "id": "T6",
+      "rule": "rule 5",
+      "title": "at 100,000 rows (windowed list), repeated edits of one row: hybrid is at least 3x faster than an immutable copy with $state.raw",
+      "pass": true,
+      "detail": {
+        "update2Ms": {
+          "raw": 1.9,
+          "hybrid": 0
+        },
+        "firstEditMs": {
+          "raw": 1.8,
+          "hybrid": 1.8
+        }
+      }
+    },
+    {
+      "id": "T7",
+      "rule": "rule 6",
+      "title": "a $state array does not return the objects you put in: identity checks fail, writes through it do not reach the original",
+      "pass": true,
+      "detail": {
+        "deepSameObject": false,
+        "deepIncludes": false,
+        "deepIndexOf": -1,
+        "deepFindById": 0,
+        "rawSameObject": true,
+        "rawIncludes": true,
+        "originalAfterProxyWrite": 486.73,
+        "proxyAfterProxyWrite": 1
+      }
+    },
+    {
+      "id": "T8",
+      "rule": "rule 7",
+      "title": "$state.snapshot of 10,000 rows is at least 2x slower than structuredClone of the same plain rows, and snapshotting an unread $state list is slower still",
+      "pass": true,
+      "detail": {
+        "snapshotRawMs": 65.4,
+        "structuredCloneMs": 10.5,
+        "snapshotDeepUnreadMs": 126
+      }
+    },
+    {
+      "id": "T9",
+      "rule": "rule 8",
+      "title": "server render: $state and $state.raw compile to the same server code, and render 10,000 rows within 15% of each other",
+      "pass": true,
+      "detail": {
+        "serverCode": "makeRows(n, 1)",
+        "responseMs": {
+          "deep": 20.55,
+          "raw": 18.6
+        }
+      }
+    },
+    {
+      "id": "T10",
+      "rule": "rule 2",
+      "title": "rendering 10,000 rows (keyed each, full list): $state takes at least 2x as long as $state.raw",
+      "pass": true,
+      "detail": {
+        "renderMs": {
+          "deep": 264.3,
+          "raw": 57
+        }
+      }
+    },
+    {
+      "id": "T11",
+      "rule": "rule 2",
+      "title": "sorting 100,000 rows: in-place sort on $state is at least 3x slower than toSorted on $state.raw",
+      "pass": true,
+      "detail": {
+        "sortMs": {
+          "deep": 469.8,
+          "raw": 25.4
+        }
+      }
+    }
+  ]
+}
