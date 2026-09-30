@@ -1,4 +1,4 @@
-// Tests that back every rule in the Measured Rules pack (R14).
+// Tests that back every rule in the Measured Rules pack: a rule without a passing test doesn't ship.
 //   bun run build && bun run test:pack
 // Each test states the behaviour a rule depends on. Timing tests compare variants on the
 // same machine in the same run (ratios, not absolute numbers), with wide margins.
@@ -35,12 +35,12 @@ async function bench(browser, variant, mode, size, ops) {
 		const base = await heapMb(cdp);
 		for (const op of ops) {
 			const x = await page.evaluate((o) => window.__bench.op(o), op);
-			if (r > 0) t[op].push(x.dom);
+			if (r > 0 && typeof x.dom === 'number') t[op].push(x.dom); // map: sort is not applicable
 			if (op === 'readAll2' && r > 0) heap.push((await heapMb(cdp)) - base);
 		}
 	}
 	await page.context().close();
-	const res = Object.fromEntries(ops.map((o) => [o, r2(median(t[o]))]));
+	const res = Object.fromEntries(ops.filter((o) => t[o].length).map((o) => [o, r2(median(t[o]))]));
 	if (heap.length) res.heapMb = r2(median(heap));
 	return res;
 }
@@ -58,9 +58,9 @@ const browser = await chromium.launch();
 
 const DATA_OPS = ['assign', 'readAll', 'readAll2', 'update', 'update2', 'replace', 'append', 'sort', 'filter'];
 try {
-	await test('T1', 'rule 1', 'at 1,000 rows every operation, every variant, finishes within one frame (16.7 ms) unthrottled, list rendered', async () => {
+	await test('T1', 'rule 1', "at 1,000 rows, list rendered, unthrottled: every operation of every variant finishes Svelte's DOM update within 16.7 ms (style and layout not included)", async () => {
 		const worst = {};
-		for (const variant of ['deep', 'raw', 'hybrid', 'class']) {
+		for (const variant of ['deep', 'raw', 'hybrid', 'class', 'map']) {
 			const b = await bench(browser, variant, 'list', 1000, DATA_OPS);
 			delete b.heapMb;
 			const [op, ms] = Object.entries(b).sort((a, c) => c[1] - a[1])[0];
@@ -70,7 +70,7 @@ try {
 		return worst;
 	});
 
-	await test('T2', 'rule 2', 'at 100,000 rows with a $derived total, $state costs at least 10x $state.raw to assign and uses 50+ MB more heap', async () => {
+	await test('T2', 'rule 2', 'at 100,000 rows with a $derived total, assign + the first $derived full read costs at least 10x more with $state than with $state.raw, and uses 50+ MB more heap', async () => {
 		const deep = await bench(browser, 'deep', 'data', 100000, ['assign', 'readAll', 'readAll2']);
 		const raw = await bench(browser, 'raw', 'data', 100000, ['assign', 'readAll', 'readAll2']);
 		expect(deep.assign >= 10 * raw.assign, `assign deep ${deep.assign} ms vs raw ${raw.assign} ms`);
@@ -126,7 +126,8 @@ try {
 		const ops = ['assign', 'update', 'update2'];
 		const raw = await bench(browser, 'raw', 'window', 100000, ops);
 		const hybrid = await bench(browser, 'hybrid', 'window', 100000, ops);
-		expect(raw.update2 >= 3 * hybrid.update2, `update2 raw ${raw.update2} ms vs hybrid ${hybrid.update2} ms`);
+		// hybrid is often below the timer resolution (~0.1 ms): compare against at least 0.1 ms
+		expect(raw.update2 >= 3 * Math.max(hybrid.update2, 0.1), `update2 raw ${raw.update2} ms vs hybrid ${hybrid.update2} ms`);
 		return { update2Ms: { raw: raw.update2, hybrid: hybrid.update2 }, firstEditMs: { raw: raw.update, hybrid: hybrid.update } };
 	});
 
@@ -189,11 +190,50 @@ try {
 		return { renderMs: { deep: deep.assign, raw: raw.assign } };
 	});
 
-	await test('T11', 'rule 2', 'sorting 100,000 rows: in-place sort on $state is at least 3x slower than toSorted on $state.raw', async () => {
+	await test('T11', 'rule 2', 'sorting 100,000 rows (data page): on $state, both in place and as toSorted + reassignment, is at least 3x slower than toSorted on $state.raw', async () => {
 		const deep = await bench(browser, 'deep', 'data', 100000, ['assign', 'sort']);
+		const deepCopy = await bench(browser, 'deep', 'data', 100000, ['assign', 'sortCopy']);
 		const raw = await bench(browser, 'raw', 'data', 100000, ['assign', 'sort']);
-		expect(deep.sort >= 3 * raw.sort, `deep ${deep.sort} ms vs raw ${raw.sort} ms`);
-		return { sortMs: { deep: deep.sort, raw: raw.sort } };
+		expect(deep.sort >= 3 * raw.sort, `in place: deep ${deep.sort} ms vs raw ${raw.sort} ms`);
+		expect(deepCopy.sortCopy >= 3 * raw.sort, `copy: deep ${deepCopy.sortCopy} ms vs raw ${raw.sort} ms`);
+		return { sortMs: { deepInPlace: deep.sort, deepToSorted: deepCopy.sortCopy, raw: raw.sort } };
+	});
+
+	await test('T12', 'rule 2', 'at 10,000 rows with a $derived total and 4x CPU throttling, one edit on $state takes at least 5x as long as on $state.raw', async () => {
+		const one = async (variant) => {
+			const { page, cdp } = await openPage(browser, `${BASE}/bench?variant=${variant}&mode=data`, 4);
+			await page.waitForFunction(() => window.__bench);
+			const xs = [];
+			for (let r = 0; r <= RUNS; r++) {
+				await page.evaluate((n) => window.__bench.prepare(n), 10000);
+				await page.evaluate(() => window.__bench.op('assign'));
+				const x = await page.evaluate(() => window.__bench.op('update'));
+				if (r > 0) xs.push(x.dom);
+			}
+			await page.context().close();
+			return r2(median(xs));
+		};
+		const deep = await one('deep');
+		const raw = await one('raw');
+		expect(deep >= 5 * Math.max(raw, 0.1), `deep ${deep} ms vs raw ${raw} ms`);
+		return { editMs4x: { deep, raw } };
+	});
+
+	await test('T13', 'rule 4', 'windowed list (50 of 100,000 rows rendered): an edit on $state is no slower than on $state.raw, but a sort on $state is at least 3x slower', async () => {
+		const ops = ['assign', 'update', 'update2', 'sort'];
+		const deep = await bench(browser, 'deep', 'window', 100000, ops);
+		const raw = await bench(browser, 'raw', 'window', 100000, ops);
+		expect(deep.update2 <= raw.update2 * 1.5 + 0.2, `edit: deep ${deep.update2} ms vs raw ${raw.update2} ms`);
+		expect(deep.sort >= 3 * raw.sort, `sort: deep ${deep.sort} ms vs raw ${raw.sort} ms`);
+		return { editMs: { deep: deep.update2, raw: raw.update2 }, sortMs: { deep: deep.sort, raw: raw.sort } };
+	});
+
+	await test('T14', 'rule 5', 'hybrid: a promoted row replaced by a new object with the same id is promoted again on its next edit, and the screen updates', async () => {
+		const { page, g } = await gotchas(browser);
+		const r = await g('hybridSameId');
+		await page.context().close();
+		expect(r.afterReplace.split(',')[1] === '5' && r.afterEdit.split(',')[1] === '77', JSON.stringify(r));
+		return r;
 	});
 } finally {
 	await browser.close();

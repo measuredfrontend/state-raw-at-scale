@@ -1,6 +1,6 @@
 {
   "env": {
-    "date": "2026-09-29T05:24:25.417Z",
+    "date": "2026-09-30T21:06:55.158Z",
     "node": "v26.3.0",
     "os": "Windows_NT 10.0.26200",
     "cpu": "13th Gen Intel(R) Core(TM) i9-13900KF",
@@ -17,31 +17,32 @@
   "otherLoad": {
     "pythonProcesses": 0,
     "python": [],
-    "cpuBusyPercentBefore": 4.29,
-    "gpu": "7 %, 3440 MiB"
+    "cpuBusyPercentBefore": 3.77,
+    "gpu": "0 %, 3341 MiB"
   },
   "results": [
     {
       "id": "T1",
       "rule": "rule 1",
-      "title": "at 1,000 rows every operation, every variant, finishes within one frame (16.7 ms) unthrottled, list rendered",
+      "title": "at 1,000 rows, list rendered, unthrottled: every operation of every variant finishes Svelte's DOM update within 16.7 ms (style and layout not included)",
       "pass": true,
       "detail": {
-        "deep": "assign 13.7 ms",
-        "raw": "assign 5.9 ms",
-        "hybrid": "assign 6.4 ms",
-        "class": "assign 7.3 ms"
+        "deep": "assign 13 ms",
+        "raw": "assign 6 ms",
+        "hybrid": "assign 6.2 ms",
+        "class": "assign 7.3 ms",
+        "map": "assign 5.8 ms"
       }
     },
     {
       "id": "T2",
       "rule": "rule 2",
-      "title": "at 100,000 rows with a $derived total, $state costs at least 10x $state.raw to assign and uses 50+ MB more heap",
+      "title": "at 100,000 rows with a $derived total, assign + the first $derived full read costs at least 10x more with $state than with $state.raw, and uses 50+ MB more heap",
       "pass": true,
       "detail": {
         "assignMs": {
-          "deep": 152,
-          "raw": 0.4
+          "deep": 150,
+          "raw": 0.5
         },
         "heapMb": {
           "deep": 148.2,
@@ -69,9 +70,9 @@
       "detail": {
         "assignMs": 0.1,
         "heapAfterAssignMb": 0,
-        "read1Ms": 119.5,
+        "read1Ms": 117.1,
         "heapAfterReadMb": 111.57,
-        "read2Ms": 47.2
+        "read2Ms": 46.3
       }
     },
     {
@@ -95,11 +96,11 @@
       "pass": true,
       "detail": {
         "update2Ms": {
-          "raw": 1.9,
+          "raw": 1.8,
           "hybrid": 0
         },
         "firstEditMs": {
-          "raw": 1.8,
+          "raw": 1.7,
           "hybrid": 1.8
         }
       }
@@ -126,9 +127,9 @@
       "title": "$state.snapshot of 10,000 rows is at least 2x slower than structuredClone of the same plain rows, and snapshotting an unread $state list is slower still",
       "pass": true,
       "detail": {
-        "snapshotRawMs": 65.4,
-        "structuredCloneMs": 10.5,
-        "snapshotDeepUnreadMs": 126
+        "snapshotRawMs": 62.3,
+        "structuredCloneMs": 10.6,
+        "snapshotDeepUnreadMs": 122.6
       }
     },
     {
@@ -139,8 +140,8 @@
       "detail": {
         "serverCode": "makeRows(n, 1)",
         "responseMs": {
-          "deep": 20.55,
-          "raw": 18.6
+          "deep": 19.09,
+          "raw": 18.98
         }
       }
     },
@@ -151,21 +152,60 @@
       "pass": true,
       "detail": {
         "renderMs": {
-          "deep": 264.3,
-          "raw": 57
+          "deep": 233.2,
+          "raw": 54.4
         }
       }
     },
     {
       "id": "T11",
       "rule": "rule 2",
-      "title": "sorting 100,000 rows: in-place sort on $state is at least 3x slower than toSorted on $state.raw",
+      "title": "sorting 100,000 rows (data page): on $state, both in place and as toSorted + reassignment, is at least 3x slower than toSorted on $state.raw",
       "pass": true,
       "detail": {
         "sortMs": {
-          "deep": 469.8,
-          "raw": 25.4
+          "deepInPlace": 438.9,
+          "deepToSorted": 362.1,
+          "raw": 22.5
         }
+      }
+    },
+    {
+      "id": "T12",
+      "rule": "rule 2",
+      "title": "at 10,000 rows with a $derived total and 4x CPU throttling, one edit on $state takes at least 5x as long as on $state.raw",
+      "pass": true,
+      "detail": {
+        "editMs4x": {
+          "deep": 15.8,
+          "raw": 1.2
+        }
+      }
+    },
+    {
+      "id": "T13",
+      "rule": "rule 4",
+      "title": "windowed list (50 of 100,000 rows rendered): an edit on $state is no slower than on $state.raw, but a sort on $state is at least 3x slower",
+      "pass": true,
+      "detail": {
+        "editMs": {
+          "deep": 0,
+          "raw": 1.7
+        },
+        "sortMs": {
+          "deep": 342.6,
+          "raw": 23.9
+        }
+      }
+    },
+    {
+      "id": "T14",
+      "rule": "rule 5",
+      "title": "hybrid: a promoted row replaced by a new object with the same id is promoted again on its next edit, and the screen updates",
+      "pass": true,
+      "detail": {
+        "afterReplace": "219.76,5,779.86",
+        "afterEdit": "219.76,77,779.86"
       }
     }
   ]

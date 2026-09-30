@@ -82,6 +82,19 @@
 				deep: text('.deep-row')
 			};
 		},
+		/** Hybrid: a promoted row is replaced by a new object with the SAME id, then edited. */
+		hybridSameId() {
+			shownHybrid.assign(makeRows(3, 5));
+			flushSync();
+			shownHybrid.updatePrice(1, 11); // promotes row 1
+			flushSync();
+			shownHybrid.replace(1, { ...$state.snapshot(shownHybrid.items[1]), price: 5 }); // same id, new plain object
+			flushSync();
+			const afterReplace = text('.hybrid-row');
+			shownHybrid.updatePrice(1, 77); // must be promoted again, or the screen stays at 5
+			flushSync();
+			return { afterReplace, afterEdit: text('.hybrid-row') };
+		},
 		/**
 		 * A big list that nothing renders. Steps are separate so the heap can be sampled
 		 * (after a forced GC) from outside between them.

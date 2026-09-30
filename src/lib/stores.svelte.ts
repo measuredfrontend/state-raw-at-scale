@@ -40,6 +40,10 @@ export class DeepList implements ListStore {
 	sortByPrice() {
 		this.items.sort(byPriceDesc);
 	}
+	/** The same sort as a copy + reassignment, to separate "in place" from "$state". */
+	sortByPriceCopy() {
+		this.items = this.items.toSorted(byPriceDesc);
+	}
 }
 
 /** 2. `$state.raw`: no proxy. Every change is a new array (immutable update). */
@@ -72,21 +76,19 @@ export function editable<T extends object>(row: T): T {
  * 3. Hybrid: `$state.raw` for the list, and a `$state` proxy only for rows that get edited.
  * The first edit of a row swaps the proxy into the array (one array copy). After that,
  * edits to that row are fine-grained: no array copy, only that row's cells update.
+ * Promotion is tracked per object, not per id: a replaced row (same id, new object) is
+ * promoted again on its next edit.
  */
 export class HybridList extends RawList {
-	#editable = new Set<number>();
+	#promoted = new WeakSet<object>();
 	updatePrice(i: number, price: number) {
 		let row = this.items[i];
-		if (!this.#editable.has(row.id)) {
+		if (!this.#promoted.has(row)) {
 			row = editable(row);
-			this.#editable.add(row.id);
+			this.#promoted.add(row);
 			this.items = this.items.with(i, row);
 		}
 		row.price = price;
-	}
-	assign(rows: Row[]) {
-		this.#editable.clear();
-		super.assign(rows);
 	}
 }
 

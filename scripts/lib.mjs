@@ -1,5 +1,5 @@
 // Shared helpers for measure.mjs and pack-tests.mjs.
-// Always the production build on the real Node adapter (`node build`), never the dev server (R9).
+// Always the production build on the real Node adapter (`node build`), never the dev server.
 import { spawn, execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import os from 'node:os';

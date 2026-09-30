@@ -24,7 +24,8 @@ const modes = [...new Set(m.bench.map((e) => e.mode))];
 for (const throttle of throttles) {
 	for (const mode of modes) {
 		const sizes = [...new Set(m.bench.filter((e) => e.mode === mode && e.throttle === throttle).map((e) => e.size))];
-		for (const op of ['assign', 'readAll', 'readAll2', 'update', 'update2', 'replace', 'append', 'sort', 'filter']) {
+		for (const op of ['assign', 'readAll', 'readAll2', 'update', 'update2', 'replace', 'append', 'sort', 'sortCopy', 'filter']) {
+			if (op === 'sortCopy' && !m.bench.some((e) => e.ops.sortCopy)) continue;
 			p();
 			p(`### ${mode} · ${op} · ${throttle}x CPU`);
 			p();

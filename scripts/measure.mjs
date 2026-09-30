@@ -46,6 +46,7 @@ const out = {
 			replace: 'replace row 7 with a new object',
 			append: 'add one row at the end',
 			sort: 'sort by price, descending (deep: in place; raw/hybrid/class: toSorted; map: not applicable)',
+			sortCopy: 'deep only: the same sort as items = items.toSorted(cmp), on a fresh unsorted list after its own untimed prepare + assign',
 			filter: 'set the status filter: the $derived filtered list recomputes (about 1 row in 4 matches)'
 		},
 		throttle: 'CDP Emulation.setCPUThrottlingRate; 1 = unthrottled, 4 = 4x slower CPU',
@@ -89,12 +90,18 @@ try {
 								if (op === 'readAll2') heap.afterReadAll = (await heapMb(cdp)) - base;
 								if (op === 'update2' || op === 'filter') check[op] = await page.evaluate(() => window.__bench.dom());
 							}
+							if (variant === 'deep') {
+								// Sort as copy + reassignment, on a fresh unsorted list (not timed: prepare, assign)
+								await page.evaluate((n) => window.__bench.prepare(n), size);
+								await page.evaluate(() => window.__bench.op('assign'));
+								t.sortCopy = await page.evaluate(() => window.__bench.op('sortCopy'));
+							}
 							if (r > 0) runs.push({ t, heap, check });
 						}
 						await page.evaluate(() => window.__bench.cleanup());
 						await page.context().close();
 						const entry = { variant, mode, size, throttle, ops: {}, heapMb: {}, check: runs[0].check };
-						for (const op of OPS) {
+						for (const op of variant === 'deep' ? [...OPS, 'sortCopy'] : OPS) {
 							const err = runs.find((x) => x.t[op]?.error)?.t[op].error;
 							entry.ops[op] = err
 								? { error: err.includes('not applicable') ? 'not applicable' : err }

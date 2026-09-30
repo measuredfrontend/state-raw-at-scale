@@ -2,7 +2,7 @@
 	import { flushSync } from 'svelte';
 	import { page } from '$app/state';
 	import { makeRow, makeRows, type Row } from '$lib/rows';
-	import { createList, readAll, type Variant } from '$lib/stores.svelte';
+	import { createList, DeepList, readAll, type Variant } from '$lib/stores.svelte';
 	import RowView from '$lib/RowView.svelte';
 
 	// /bench?variant=deep|raw|hybrid|class|map&mode=data|list|window
@@ -43,6 +43,8 @@
 		replace: () => list.replace(7, spare[0]),
 		append: () => list.append(spare[1]),
 		sort: () => list.sortByPrice(),
+		// $state only: sort as a copy + reassignment (measured on a fresh, unsorted list)
+		sortCopy: () => (list instanceof DeepList ? list.sortByPriceCopy() : list.sortByPrice()),
 		filter: () => (filter = 'late')
 	};
 
