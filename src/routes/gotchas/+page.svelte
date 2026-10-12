@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { flushSync } from 'svelte';
-	import { makeRow, makeRows, type Row } from '$lib/rows';
-	import { DeepList, RawList, HybridList, ClassList, readAll } from '$lib/stores.svelte';
+	import { makeRow, makeRows, type Row } from '#lib/rows.js';
+	import { DeepList, RawList, HybridList, ClassList, readAll } from '#lib/stores.svelte.js';
 
 	// Small lists that ARE rendered, for behaviour checks.
 	const shownRaw = new RawList();

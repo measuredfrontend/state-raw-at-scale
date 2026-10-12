@@ -1,11 +1,11 @@
 {
   "source": "results/measure.json",
-  "date": "2026-09-30T18:08:14.603Z",
+  "date": "2026-10-09T09:06:39.878Z",
   "at1k": {
     "1x data": {
-      "maxMs": 2.2,
+      "maxMs": 2.3,
       "maxOp": "sort (deep)",
-      "maxDiff": 2,
+      "maxDiff": 2.1,
       "diffOp": "sort"
     },
     "1x window": {
@@ -15,27 +15,27 @@
       "diffOp": "sort"
     },
     "1x list": {
-      "maxMs": 12.8,
+      "maxMs": 12.9,
       "maxOp": "assign (deep)",
-      "maxDiff": 7.1,
+      "maxDiff": 7,
       "diffOp": "assign"
     },
     "4x data": {
-      "maxMs": 9.7,
+      "maxMs": 10.5,
       "maxOp": "sort (deep)",
-      "maxDiff": 8.9,
+      "maxDiff": 9.7,
       "diffOp": "sort"
     },
     "4x window": {
-      "maxMs": 10,
+      "maxMs": 10.4,
       "maxOp": "sort (deep)",
-      "maxDiff": 6.5,
+      "maxDiff": 6.9,
       "diffOp": "sort"
     },
     "4x list": {
-      "maxMs": 50.4,
+      "maxMs": 54,
       "maxOp": "assign (deep)",
-      "maxDiff": 24.9,
+      "maxDiff": 27.2,
       "diffOp": "assign"
     }
   },
@@ -50,57 +50,57 @@
     {
       "throttle": 1,
       "size": 10000,
-      "deepMs": 3.2,
+      "deepMs": 3.4,
       "rawMs": 0.1,
-      "ratio": 32
+      "ratio": 34
     },
     {
       "throttle": 1,
       "size": 100000,
-      "deepMs": 44.1,
+      "deepMs": 48,
       "rawMs": 0.2,
-      "ratio": 221
+      "ratio": 240
     },
     {
       "throttle": 1,
       "size": 250000,
-      "deepMs": 118,
+      "deepMs": 117.3,
       "rawMs": 0.8,
-      "ratio": 148
+      "ratio": 147
     },
     {
       "throttle": 4,
       "size": 1000,
-      "deepMs": 1.2,
-      "rawMs": 0,
-      "ratio": 12
+      "deepMs": 1.5,
+      "rawMs": 0.1,
+      "ratio": 15
     },
     {
       "throttle": 4,
       "size": 10000,
-      "deepMs": 15.2,
+      "deepMs": 15.8,
       "rawMs": 0.2,
-      "ratio": 76
+      "ratio": 79
     },
     {
       "throttle": 4,
       "size": 100000,
-      "deepMs": 178.1,
-      "rawMs": 1.2,
-      "ratio": 148
+      "deepMs": 205.3,
+      "rawMs": 1.3,
+      "ratio": 158
     },
     {
       "throttle": 4,
       "size": 250000,
-      "deepMs": 455.5,
-      "rawMs": 3.6,
-      "ratio": 127
+      "deepMs": 471.2,
+      "rawMs": 5.2,
+      "ratio": 91
     }
   ],
   "vsUnderLoad": {
-    "comparedMedians": 597,
-    "medianDiffPercent": 7,
-    "p90DiffPercent": 37,
-    "within15Percent": 75
+    "comparedMedians": 602,
+    "medianDiffPercent": 6,
+    "p90DiffPercent": 22,
+    "within15Percent": 81
   }
 }

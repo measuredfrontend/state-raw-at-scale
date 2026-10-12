@@ -1,0 +1,229 @@
+{
+  "env": {
+    "date": "2026-10-09T10:33:00.376Z",
+    "node": "v26.3.0",
+    "os": "Windows_NT 10.0.26200",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900KF",
+    "cores": 32,
+    "ramGb": 64,
+    "svelte": "5.57.1",
+    "kit": "3.0.1",
+    "adapterNode": "6.0.0",
+    "vite": "8.3.1",
+    "playwright": "1.63.0",
+    "chromium": "153.0.8010.12",
+    "server": "node build (adapter-node), production build, http://127.0.0.1:4304"
+  },
+  "otherLoad": {
+    "pythonProcesses": 4,
+    "python": [
+      {
+        "Id": 15220,
+        "CPU": 0.015625
+      },
+      {
+        "Id": 38480,
+        "CPU": 0.015625
+      },
+      {
+        "Id": 51040,
+        "CPU": 1.296875
+      },
+      {
+        "Id": 58388,
+        "CPU": 1.890625
+      }
+    ],
+    "cpuBusyPercentBefore": 12.62,
+    "gpu": "6 %, 3345 MiB"
+  },
+  "results": [
+    {
+      "id": "T1",
+      "rule": "rule 1",
+      "title": "at 1,000 rows, list rendered, unthrottled: every operation of every variant finishes Svelte's DOM update within 16.7 ms (style and layout not included)",
+      "pass": true,
+      "detail": {
+        "deep": "assign 13.4 ms",
+        "raw": "assign 5.9 ms",
+        "hybrid": "assign 6.1 ms",
+        "class": "assign 7 ms",
+        "map": "assign 6.1 ms"
+      }
+    },
+    {
+      "id": "T2",
+      "rule": "rule 2",
+      "title": "at 100,000 rows with a $derived total, assign + the first $derived full read costs at least 10x more with $state than with $state.raw, and uses 50+ MB more heap",
+      "pass": true,
+      "detail": {
+        "assignMs": {
+          "deep": 154.8,
+          "raw": 0.4
+        },
+        "heapMb": {
+          "deep": 148.21,
+          "raw": 0.01
+        }
+      }
+    },
+    {
+      "id": "T3",
+      "rule": "rule 3",
+      "title": "$state.raw mutated in place: the screen does not change; a new array shows the pushed row but NOT the edited field; only a new object for that row shows it",
+      "pass": true,
+      "detail": {
+        "before": "976.91,466.23,257.82",
+        "afterMutation": "976.91,466.23,257.82",
+        "afterNewArray": "976.91,466.23,257.82,500",
+        "afterNewRowObject": "999,466.23,257.82,500"
+      }
+    },
+    {
+      "id": "T4",
+      "rule": "rule 4",
+      "title": "$state creates proxies lazily: assigning 100,000 unread rows is under 5 ms and adds under 1 MB; the first full read adds 50+ MB and is slower than the second",
+      "pass": true,
+      "detail": {
+        "assignMs": 0,
+        "heapAfterAssignMb": 0,
+        "read1Ms": 118.3,
+        "heapAfterReadMb": 111.57,
+        "read2Ms": 46.1
+      }
+    },
+    {
+      "id": "T5",
+      "rule": "rule 5",
+      "title": "hybrid: the first edit of a row swaps in a $state proxy (new array); later edits change only that row (same array) and update the screen",
+      "pass": true,
+      "detail": {
+        "hybrid": "219.76,22,779.86",
+        "hybridArrayReplacedOnFirstEdit": true,
+        "hybridArrayKeptOnSecondEdit": true,
+        "klass": "219.76,33,779.86",
+        "classArrayKept": true,
+        "deep": "219.76,44,779.86"
+      }
+    },
+    {
+      "id": "T6",
+      "rule": "rule 5",
+      "title": "at 100,000 rows (windowed list), repeated edits of one row: hybrid is at least 3x faster than an immutable copy with $state.raw",
+      "pass": true,
+      "detail": {
+        "update2Ms": {
+          "raw": 1.8,
+          "hybrid": 0.1
+        },
+        "firstEditMs": {
+          "raw": 1.8,
+          "hybrid": 1.8
+        }
+      }
+    },
+    {
+      "id": "T7",
+      "rule": "rule 6",
+      "title": "a $state array does not return the objects you put in: identity checks fail, writes through it do not reach the original",
+      "pass": true,
+      "detail": {
+        "deepSameObject": false,
+        "deepIncludes": false,
+        "deepIndexOf": -1,
+        "deepFindById": 0,
+        "rawSameObject": true,
+        "rawIncludes": true,
+        "originalAfterProxyWrite": 486.73,
+        "proxyAfterProxyWrite": 1
+      }
+    },
+    {
+      "id": "T8",
+      "rule": "rule 7",
+      "title": "$state.snapshot of 10,000 rows is at least 2x slower than structuredClone of the same plain rows, and snapshotting an unread $state list is slower still",
+      "pass": true,
+      "detail": {
+        "snapshotRawMs": 63.5,
+        "structuredCloneMs": 10.7,
+        "snapshotDeepUnreadMs": 126.1
+      }
+    },
+    {
+      "id": "T9",
+      "rule": "rule 8",
+      "title": "server render: $state and $state.raw compile to the same server code, and render 10,000 rows within 15% of each other",
+      "pass": true,
+      "detail": {
+        "serverCode": "makeRows(n, 1)",
+        "responseMs": {
+          "deep": 16.34,
+          "raw": 16.31
+        }
+      }
+    },
+    {
+      "id": "T10",
+      "rule": "rule 2",
+      "title": "rendering 10,000 rows (keyed each, full list): $state takes at least 2x as long as $state.raw",
+      "pass": true,
+      "detail": {
+        "renderMs": {
+          "deep": 222.3,
+          "raw": 56.1
+        }
+      }
+    },
+    {
+      "id": "T11",
+      "rule": "rule 2",
+      "title": "sorting 100,000 rows (data page): on $state, both in place and as toSorted + reassignment, is at least 3x slower than toSorted on $state.raw",
+      "pass": true,
+      "detail": {
+        "sortMs": {
+          "deepInPlace": 476.3,
+          "deepToSorted": 409.8,
+          "raw": 23.6
+        }
+      }
+    },
+    {
+      "id": "T12",
+      "rule": "rule 2",
+      "title": "at 10,000 rows with a $derived total and 4x CPU throttling, one edit on $state takes at least 5x as long as on $state.raw",
+      "pass": true,
+      "detail": {
+        "editMs4x": {
+          "deep": 16.8,
+          "raw": 1.3
+        }
+      }
+    },
+    {
+      "id": "T13",
+      "rule": "rule 4",
+      "title": "windowed list (50 of 100,000 rows rendered): an edit on $state is no slower than on $state.raw, but a sort on $state is at least 3x slower",
+      "pass": true,
+      "detail": {
+        "editMs": {
+          "deep": 0.1,
+          "raw": 1.8
+        },
+        "sortMs": {
+          "deep": 351.2,
+          "raw": 24.2
+        }
+      }
+    },
+    {
+      "id": "T14",
+      "rule": "rule 5",
+      "title": "hybrid: a promoted row replaced by a new object with the same id is promoted again on its next edit, and the screen updates",
+      "pass": true,
+      "detail": {
+        "afterReplace": "219.76,5,779.86",
+        "afterEdit": "219.76,77,779.86"
+      }
+    }
+  ]
+}

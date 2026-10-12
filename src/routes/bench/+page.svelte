@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { flushSync } from 'svelte';
 	import { page } from '$app/state';
-	import { makeRow, makeRows, type Row } from '$lib/rows';
-	import { createList, DeepList, readAll, type Variant } from '$lib/stores.svelte';
-	import RowView from '$lib/RowView.svelte';
+	import { makeRow, makeRows, type Row } from '#lib/rows.js';
+	import { createList, DeepList, readAll, type Variant } from '#lib/stores.svelte.js';
+	import RowView from '#lib/RowView.svelte';
 
 	// /bench?variant=deep|raw|hybrid|class|map&mode=data|list|window
 	const variant = (page.url.searchParams.get('variant') ?? 'deep') as Variant;

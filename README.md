@@ -87,7 +87,7 @@ At 4x the 100k full render took 59,273 ms with `$state` and 2,475 ms with raw.
 
 **Snapshots** (10,000 rows): `$state.snapshot` of raw rows 69 ms vs `structuredClone` 11 ms; of an unread `$state` list 128 ms (`structuredClone` of the proxy throws).
 
-All tables, with min and max: `node scripts/report.mjs` → `results/measure.report.md`. Raw numbers: `results/measure.json`, `results/summary.json`, `results/pack-tests.json`.
+All tables, with min and max: `node scripts/report.mjs` → `results/measure.report.md`. Raw numbers for the tables in this README: `results/kit2-2026-09-30/` (`measure.json`, `summary.json`, `pack-tests.json`).
 
 ## Findings
 
@@ -103,7 +103,7 @@ All tables, with min and max: `node scripts/report.mjs` → `results/measure.rep
 10. **The server doesn't care:** `$state(...)` compiles to the plain value; render time was the same (T9). Hydration reads every row, so `$state` hydrated slower.
 11. The earlier probe's "assign 62 ms" for 100k rows was really the first full read: its page had a `$derived` over every row.
 
-Versions: Svelte 5.57.1, SvelteKit 2.70.3, adapter-node 5.5.7, Vite 8.3.1, Playwright 1.63.0 (Chromium 153.0.8010.12), Node 26.3.0.
+Versions: the code on `main` runs on SvelteKit 3.0.1. The tables in this README are from the SvelteKit 2.70.3 run of 30 Sep 2026: Svelte 5.57.1, adapter-node 5.5.7, Vite 8.3.1, Playwright 1.63.0 (Chromium 153.0.8010.12), Node 26.3.0. The SvelteKit 3.0.1 run of 9 Oct 2026 is in `results/kit3-2026-10-09/` (the same files are directly in `results/`). It was slower on one edit in a 100,000-row `$state` list: 48 → 54 ms unthrottled and 202 → 235 ms with the CPU throttled 4x (+17%); `$state.raw` stays far ahead on it (2.2 → 2.4 ms). The thresholds in this README have not been re-checked against that run yet. The SvelteKit 2 code is at the tag `kit2`.
 
 ## Two rules you can use today
 
@@ -122,7 +122,7 @@ The full set (rules for windowed lists, which rows to make reactive, identity, s
 - `src/routes/gotchas/+page.svelte`: raw in-place mutation, identity, fine-grained edits, same-id replacement, lazy proxies, snapshots
 - `src/routes/ssr/deep`, `src/routes/ssr/raw`: the same list rendered on the server
 - `scripts/measure.mjs`, `scripts/report.mjs`, `scripts/compare.mjs`, `scripts/pack-tests.mjs`, `scripts/lib.mjs`
-- `results/measure.json` (current run), `results/measure-2026-09-29.json` (previous run, before the hybrid fix and without full-list 100k at 4x), `results/measure-under-load.json` (an earlier run while a GPU job ran), `results/pack-tests.json`
+- `results/measure.json` (current run: SvelteKit 3.0.1, 9 Oct 2026; the SvelteKit 2.70.3 run of 30 Sep is `results/kit2-2026-09-30/measure.json`), `results/measure-2026-09-29.json` (previous run, before the hybrid fix and without full-list 100k at 4x), `results/measure-under-load.json` (an earlier run while a GPU job ran), `results/pack-tests.json`
 
 ## Licence
 

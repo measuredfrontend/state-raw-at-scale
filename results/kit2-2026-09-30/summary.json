@@ -1,0 +1,106 @@
+{
+  "source": "results/measure.json",
+  "date": "2026-09-30T18:08:14.603Z",
+  "at1k": {
+    "1x data": {
+      "maxMs": 2.2,
+      "maxOp": "sort (deep)",
+      "maxDiff": 2,
+      "diffOp": "sort"
+    },
+    "1x window": {
+      "maxMs": 2.1,
+      "maxOp": "sort (deep)",
+      "maxDiff": 1.4,
+      "diffOp": "sort"
+    },
+    "1x list": {
+      "maxMs": 12.8,
+      "maxOp": "assign (deep)",
+      "maxDiff": 7.1,
+      "diffOp": "assign"
+    },
+    "4x data": {
+      "maxMs": 9.7,
+      "maxOp": "sort (deep)",
+      "maxDiff": 8.9,
+      "diffOp": "sort"
+    },
+    "4x window": {
+      "maxMs": 10,
+      "maxOp": "sort (deep)",
+      "maxDiff": 6.5,
+      "diffOp": "sort"
+    },
+    "4x list": {
+      "maxMs": 50.4,
+      "maxOp": "assign (deep)",
+      "maxDiff": 24.9,
+      "diffOp": "assign"
+    }
+  },
+  "fullReadRatio": [
+    {
+      "throttle": 1,
+      "size": 1000,
+      "deepMs": 0.3,
+      "rawMs": 0,
+      "ratio": 3
+    },
+    {
+      "throttle": 1,
+      "size": 10000,
+      "deepMs": 3.2,
+      "rawMs": 0.1,
+      "ratio": 32
+    },
+    {
+      "throttle": 1,
+      "size": 100000,
+      "deepMs": 44.1,
+      "rawMs": 0.2,
+      "ratio": 221
+    },
+    {
+      "throttle": 1,
+      "size": 250000,
+      "deepMs": 118,
+      "rawMs": 0.8,
+      "ratio": 148
+    },
+    {
+      "throttle": 4,
+      "size": 1000,
+      "deepMs": 1.2,
+      "rawMs": 0,
+      "ratio": 12
+    },
+    {
+      "throttle": 4,
+      "size": 10000,
+      "deepMs": 15.2,
+      "rawMs": 0.2,
+      "ratio": 76
+    },
+    {
+      "throttle": 4,
+      "size": 100000,
+      "deepMs": 178.1,
+      "rawMs": 1.2,
+      "ratio": 148
+    },
+    {
+      "throttle": 4,
+      "size": 250000,
+      "deepMs": 455.5,
+      "rawMs": 3.6,
+      "ratio": 127
+    }
+  ],
+  "vsUnderLoad": {
+    "comparedMedians": 597,
+    "medianDiffPercent": 7,
+    "p90DiffPercent": 37,
+    "within15Percent": 75
+  }
+}

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { makeRows } from '$lib/rows';
-	import RowView from '$lib/RowView.svelte';
+	import { makeRows } from '#lib/rows.js';
+	import RowView from '#lib/RowView.svelte';
 
 	// Server-rendered list held in `$state.raw`. Same seeded rows on server and client.
 	const n = Number(page.url.searchParams.get('n') ?? 1000);
